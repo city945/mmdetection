@@ -118,10 +118,13 @@ class DetDataPreprocessor(ImgDataPreprocessor):
         Returns:
             dict: Data in the same format as the model input.
         """
+        # @# 重新计算边界填充后每个图像的尺寸，如果输入为图像列表则为尺寸列表，如果输入为图像张量则为单个尺寸，并后续添加到数据样本实例的元信息中
         batch_pad_shape = self._get_pad_shape(data)
+        # @# 执行父类函数，递归搬运数据到目标设备，依次执行数据变换 (1) 交换颜色通道 (2) 图像归一化 (3) 边界填充
         data = super().forward(data=data, training=training)
         inputs, data_samples = data['inputs'], data['data_samples']
 
+        # @# 同步操作数据样本实例中的真值
         if data_samples is not None:
             # NOTE the batched image size information may be useful, e.g.
             # in DETR, this is needed for the construction of masks, which is
@@ -142,6 +145,7 @@ class DetDataPreprocessor(ImgDataPreprocessor):
             if self.pad_seg and training:
                 self.pad_gt_sem_seg(data_samples)
 
+        # @# 执行批量数据增强如 Mosaic
         if training and self.batch_augments is not None:
             for batch_aug in self.batch_augments:
                 inputs, data_samples = batch_aug(inputs, data_samples)

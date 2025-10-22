@@ -394,6 +394,7 @@ class ResNet(BaseModule):
         if depth not in self.arch_settings:
             raise KeyError(f'invalid depth {depth} for resnet')
 
+        # @# 创建模型参数初始化配置，如没有指定预训练模型路径则采用默认配置即 Kaiming 初始化卷积层等
         block_init_cfg = None
         assert not (init_cfg and pretrained), \
             'init_cfg and pretrained cannot be specified at the same time'
@@ -456,6 +457,7 @@ class ResNet(BaseModule):
 
         self._make_stem_layer(in_channels, stem_channels)
 
+        # @# 逐阶段构造网络
         self.res_layers = []
         for i, num_blocks in enumerate(self.stage_blocks):
             stride = strides[i]
@@ -465,6 +467,7 @@ class ResNet(BaseModule):
                 stage_plugins = self.make_stage_plugins(plugins, i)
             else:
                 stage_plugins = None
+            # i 为阶段数，每过一个阶段升维两倍
             planes = base_channels * 2**i
             res_layer = self.make_res_layer(
                 block=self.block,
